@@ -1,0 +1,210 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Records Management</title>
+    <link rel="stylesheet" href="{% static 'css/medicalrecordsmanagement.css' %}">
+</head>
+
+<body>
+    <div class="medical-records-container">
+        <header class="header">
+            <div class="header-content shadow-lg rounded-lg">
+                <div class="logo">
+                    <img src="{% static 'img/logo.png' %}" alt="A_venture">
+                    <span>Elsi7a Track</span>
+                </div>
+                <nav class="navbar">
+                    <div class="logo">
+                        <img src="{% static 'img/logo.png' %}" alt="A_venture">
+                        <span>A_venture</span>
+                    </div>
+                    <div class="links">
+                        <a href="{% url 'logout' %}">Logout</a>
+                    </div>
+                </nav>
+            </div>
+        </header>
+
+        <div class="text-center p-6 bg-white rounded-lg shadow-md mb-8"
+            style="margin-top: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center;">
+            <h2 class="title">A_venture</h2>
+            <p class="subtitle">Effortless database Management</p>
+            <h1>Upload Excel File</h1>
+            <form action="{% url 'upload_file' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <input type="file" name="file" accept=".xlsx">
+                <input type="submit" value="Upload">
+            </form>
+
+        </div>
+
+        <main>
+            <div class="table-container">
+                <div class="records-header">
+                    <div class="search-bar" style="width: 400px;">
+                        <input type="text" id="search-input" placeholder="Search records..." style="width: 100%;">
+                    </div>
+                </div>
+                <table class="patients-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>wilaya</th>
+                            <th>field</th>
+                            <th>activity</th>
+                            <th>description</th>
+                            <th>label</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="records-table-body"></tbody>
+                </table>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== '') {
+                const cookies = document.cookie.split(';');
+                for (let i = 0; i < cookies.length; i++) {
+                    const cookie = cookies[i].trim();
+                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                        break;
+                    }
+                }
+            }
+            return cookieValue;
+        }
+
+        function handleStatusChange(id) {
+            const statusCell = document.getElementById(`status-cell-${id}`);
+            const currentStatus = statusCell.textContent;
+            const newStatus = currentStatus === 'accepted' ? 'rejected' : 'accepted';
+
+            fetch(`/change_status/${id}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken')
+                },
+                body: JSON.stringify({ status: newStatus })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        return response.json().then(err => { throw new Error(err.message || response.statusText) });
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        statusCell.textContent = newStatus;
+                        const statusButton = document.querySelector(`#record-row-${id} .change-btn`);
+                        if (statusButton) {
+                            statusButton.textContent = newStatus === 'accepted' ? 'Reject' : 'Accept';
+                            statusButton.textContent = newStatus === 'rejected' ? 'Accept' : 'Reject';
+                        }
+                    } else {
+                        alert(data.message || `Failed to change status for record with ID: ${id}.`);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while trying to change the status: ' + error.message);
+                });
+        }
+
+        function handleDelete(id) {
+            if (confirm(`Are you sure you want to delete the record with ID: ${id}?`)) {
+                fetch(`/delete_record/${id}/`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': getCookie('csrftoken')
+                    },
+                })
+                    .then(response => {
+                        if (!response.ok) {
+                            return response.json().then(err => { throw new Error(err.message || response.statusText) });
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        if (data.success) {
+                            alert(data.message);
+                            const row = document.getElementById(`record-row-${id}`);
+                            if (row) {
+                                row.remove();
+                            }
+                        } else {
+                            alert(data.message || `Failed to delete record with ID: ${id}.`);
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        alert('An error occurred while trying to delete the record: ' + error.message);
+                    });
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const recordsJson = JSON.parse('{{ records_json|safe }}');
+            const records = recordsJson.map(record => ({
+                id: record.pk,
+                wilaya: record.fields.wilaya,
+                field: record.fields.field,
+                activity: record.fields.activity,
+                description: record.fields.description,
+                label: record.fields.label
+            }));
+
+            function renderTable(data) {
+                const recordsTableBody = document.getElementById("records-table-body");
+                recordsTableBody.innerHTML = data.map(record => `
+        <tr id="record-row-${record.id}">
+            <td>${record.id}</td>
+            <td>${record.wilaya}</td>
+            <td>${record.field}</td>
+            <td>${record.activity}</td>
+            <td>${record.description}</td>
+            <td id="status-cell-${record.id}">${record.label}</td>
+            <td>
+                <div class="button-container">
+                    <button class="change-btn" onclick="handleStatusChange(${record.id})" style="margin-buttom: 10px;">
+                        ${record.label === 'accepted' ? 'Reject':'Accept'}
+                    </button>
+                    <button class="delete-btn" onclick="handleDelete(${record.id})" style="margin-up: 10px;">Delete</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+            }
+
+            function handleSearch() {
+                const searchInput = document.getElementById("search-input");
+                const searchTerm = searchInput.value.toLowerCase();
+                const filteredRecords = records.filter(record =>
+                    record.wilaya.toLowerCase().includes(searchTerm) ||
+                    record.field.toLowerCase().includes(searchTerm) ||
+                    record.activity.toLowerCase().includes(searchTerm) ||
+                    record.description.toLowerCase().includes(searchTerm) ||
+                    record.label.toLowerCase().includes(searchTerm) ||
+                    record.id.toString().toLowerCase().includes(searchTerm)
+                );
+                renderTable(filteredRecords);
+            }
+
+            document.getElementById("search-input").addEventListener("input", handleSearch);
+            renderTable(records);
+        });
+    </script>
+</body>
+
+</html>

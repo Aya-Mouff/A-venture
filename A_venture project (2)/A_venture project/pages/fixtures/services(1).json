@@ -1,0 +1,72 @@
+[
+    {
+        "model": "pages.service",
+        "pk": 1,
+        "fields": {
+            "name": "General Consultation"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 2,
+        "fields": {
+            "name": "Dental Cleaning"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 3,
+        "fields": {
+            "name": "Physical Therapy Session"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 4,
+        "fields": {
+            "name": "Laboratory Blood Test"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 5,
+        "fields": {
+            "name": "Vaccination"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 6,
+        "fields": {
+            "name": "X-Ray Imaging"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 7,
+        "fields": {
+            "name": "Ultrasound Examination"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 8,
+        "fields": {
+            "name": "Cardiology Consultation"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 9,
+        "fields": {
+            "name": "Orthopedic Checkup"
+        }
+    },
+    {
+        "model": "pages.service",
+        "pk": 10,
+        "fields": {
+            "name": "Dietitian Consultation"
+        }
+    }
+]

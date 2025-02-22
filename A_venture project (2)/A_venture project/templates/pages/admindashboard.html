@@ -1,0 +1,116 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="{% static 'css/receptionistDashboard.css' %}">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.5/main.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div class="sidebar">
+        <div class="sidebar-card">
+            <img src="{% static 'img/profile.png' %}" alt="Admin Picture" class="avatar">
+            <h3>{{ admin_name }}</h3>
+            <p>{{ admin_email }}</p>
+        </div>
+        <div class="sidebar-links">
+            <a href="{% url 'recordsmanagement' %}">Manage records</a>
+        </div>
+
+        <div class="sidebar-bottom-icons">
+            <div class="icon">
+                <a href="{% url 'logout' %}" class="icon-text">
+                <div class="logout-icon">
+                    <i class="fa fa-sign-out"></i>
+                    <p>Log out</p>
+                </div>
+            </a>
+            </div>
+        </div>
+    </div>
+    
+
+    <div class="main">
+        <h1>Admin Dashboard</h1>
+        <h2>Overview</h2>
+        <div class="card-container">
+            <div class="card">
+                <h2>Total records</h2>
+                <p>{{ total_records }}</p>
+            </div>
+            <div class="card">
+                <h2>Total accepted suggestions</h2>
+                <p>{{ total_accepted }}</p>
+            </div>
+            <div class="card">
+                <h2>Total rejected suggestions</h2>
+                <p>{{ total_rejected }}</p>
+            </div>
+        </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <!-- <th>ID</th> -->
+                            <th>Action</th>
+                            <th>Timestamp</th>
+                            <!-- <th>Actor</th> -->
+                            <th>Object</th>
+                            <th>Changes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for entry in entries %}
+                        <tr>
+                            <!-- <td>{{ entry.id }}</td> -->
+                            <td>
+                                {% if entry.action == 'create' %}
+                                <span class="action-create">{{ entry.action }}</span>
+                                {% elif entry.action == 'update' %}
+                                <span class="action-update">{{ entry.action }}</span>
+                                {% elif entry.action == 'delete' %}
+                                <span class="action-delete">{{ entry.action }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ entry.timestamp }}</td>
+                            <!-- <td>{{ entry.actor }}</td> -->
+                            <td>
+                                {% if entry.content_type %}
+                                {{ entry.content_type.model }} -
+                                {{ entry.object_repr }}
+                                {% else %}
+                                Unknown
+                                {% endif %}
+                            </td>
+                            <td class="changes-column">
+                                <ul>
+                                    {% for field, values in entry.changes %}
+                                    <li>
+                                        <strong>{{ field|capfirst }}:</strong>
+                                        {% if values.0 and values.1 %}
+                                        Changed from <em>{{ values.0 }}</em> to <em>{{ values.1 }}</em>
+                                        {% elif values.0 %}
+                                        Set to <em>{{ values.0 }}</em>
+                                        {% else %}
+                                        Deleted
+                                        {% endif %}
+                                    </li>
+                                    {% endfor %}
+                                </ul>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+
+
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.1/main.min.js"></script>
+    <script src="{% static 'js/admin_dashboard.js' %}"></script>
+</body>
+
+</html>

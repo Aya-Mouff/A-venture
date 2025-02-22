@@ -1,0 +1,102 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+
+<body class="min-h-screen flex items-center justify-center bg-gradient-to-r from-sky-800 to-blue-200 w-full">
+  <div class="flex flex-col md:flex-row bg-blue-500 rounded-2xl shadow-2xl">
+    <!-- Left Section -->
+    <div class="flex flex-col items-center justify-center bg-blue-900 text-white rounded-tr-3xl rounded-br-3xl rounded-tl-2xl rounded-bl-2xl p-6 md:p-12 md:w-1/2">
+      <div class="flex items-center mb-4">
+      </div>
+      <p class="text-xl text-center text-blue-300">
+        Effortlessly manage database records with precision and care.
+      </p>
+      <img src="{% static 'img/db.jpg' %}" alt="database" class="mt-6 w-64 md:w-96" />
+    </div>
+
+
+    <!-- Right Section -->
+    <div class="flex flex-col justify-center items-center p-6 md:p-12 md:w-1/2">
+      <h2 class="text-3xl font-extrabold text-blue-950 mb-6">Log In</h2>
+      <form id="login-form" method="post" action="{% url 'login' %}" class="w-full flex flex-col items-center">
+        {% csrf_token %}
+        <div id="form-error" class="text-red-500 text-sm font-bold mb-4 {% if error_message %} {% else %} hidden {% endif %}">{{ error_message }}</div>
+        <div id="form-success" class="text-green-500 text-sm font-bold mb-4 hidden"></div>
+
+        <div class="mb-4 w-full">
+          <label for="username" class="block text-blue-950 text-start text-[18px] font-medium mb-2">
+            Username or email address
+          </label>
+          <input type="text" id="username" name="username" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-[16px]" placeholder="Enter your username or email" />
+          <p id="username-error" class="text-red-500 text-sm font-bold mt-1 hidden"></p>
+        </div>
+
+        <div class="mb-4 w-full">
+          <label for="password" class="block text-blue-950 text-start text-[18px] font-medium mb-2">
+            Password
+          </label>
+          <input type="password" id="password" name="password" class="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-black text-[16px]" placeholder="Enter your password" />
+          <p id="password-error" class="text-red-500 text-sm font-bold mt-1 hidden"></p>
+          <div class="text-right mt-2">
+            <a href="#" class="text-blue-950 hover:underline text-sm">Forget password?</a>
+          </div>
+        </div>
+
+        <button type="submit" class="w-1/2 bg-blue-900 text-blue-300 py-2 rounded-lg hover:bg-blue-800 font-medium">
+          Log In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById('login-form').addEventListener('submit', function (event) {
+      event.preventDefault();
+
+      // Clear previous messages
+      const formError = document.getElementById('form-error');
+      const formSuccess = document.getElementById('form-success');
+      const usernameError = document.getElementById('username-error');
+      const passwordError = document.getElementById('password-error');
+
+      formError.classList.add('hidden');
+      formSuccess.classList.add('hidden');
+      usernameError.classList.add('hidden');
+      passwordError.classList.add('hidden');
+
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value;
+
+      let hasError = false;
+
+      if (!username) {
+        usernameError.textContent = 'Username or email is required.';
+        usernameError.classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (!password) {
+        passwordError.textContent = 'Password is required.';
+        passwordError.classList.remove('hidden');
+        hasError = true;
+      }
+
+      if (!hasError) {
+        document.getElementById('login-form').submit();
+      } else {
+        formError.textContent = 'Please fix the errors below.';
+        formError.classList.remove('hidden');
+      }
+    });
+  </script>
+
+</body>
+
+</html>
