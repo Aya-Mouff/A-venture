@@ -86,7 +86,7 @@
         function handleStatusChange(id) {
             const statusCell = document.getElementById(`status-cell-${id}`);
             const currentStatus = statusCell.textContent;
-            const newStatus = currentStatus === 'accepted' ? 'rejected' : 'accepted';
+            const newStatus = currentStatus === 'Accepting' ? 'rejecting' : 'Accepting';
 
             fetch(`/change_status/${id}/`, {
                 method: 'POST',
@@ -108,8 +108,8 @@
                         statusCell.textContent = newStatus;
                         const statusButton = document.querySelector(`#record-row-${id} .change-btn`);
                         if (statusButton) {
-                            statusButton.textContent = newStatus === 'accepted' ? 'Reject' : 'Accept';
-                            statusButton.textContent = newStatus === 'rejected' ? 'Accept' : 'Reject';
+                            statusButton.textContent = newStatus === 'Accepting' ? 'Reject' : 'Accept';
+                            statusButton.textContent = newStatus === 'Rejecting' ? 'Accept' : 'Reject';
                         }
                     } else {
                         alert(data.message || `Failed to change status for record with ID: ${id}.`);
@@ -178,7 +178,7 @@
             <td>
                 <div class="button-container">
                     <button class="change-btn" onclick="handleStatusChange(${record.id})" style="margin-buttom: 10px;">
-                        ${record.label === 'accepted' ? 'Reject':'Accept'}
+                        ${record.label === 'Accepting' ? 'Reject':'Accept'}
                     </button>
                     <button class="delete-btn" onclick="handleDelete(${record.id})" style="margin-up: 10px;">Delete</button>
                 </div>

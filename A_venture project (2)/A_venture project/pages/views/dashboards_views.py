@@ -8,8 +8,8 @@ from auditlog.models import LogEntry
 
 def admindashboard(request):
     total_records = Record.objects.count() 
-    total_accepted = Record.objects.filter(label='accepted').count() 
-    total_rejected = Record.objects.filter(label='rejected').count()
+    total_Accepted = Record.objects.filter(label='Accepted').count() 
+    total_Rejected = Record.objects.filter(label='Rejected').count()
      
     entries = LogEntry.objects.all()[:10]
     parsed_entries = []
@@ -31,8 +31,8 @@ def admindashboard(request):
         'admin_name': request.session.get('admin_name'),
         'admin_email': request.session.get('admin_email'),
         'total_records': total_records,
-        'total_accepted': total_accepted,
-        'total_rejected': total_rejected,
+        'total_Accepted': total_Accepted,
+        'total_Rejected': total_Rejected,
     }
     return render(request, 'pages/admindashboard.html', context)
 

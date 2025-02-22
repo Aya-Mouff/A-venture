@@ -32,8 +32,8 @@ class User(models.Model):
 class Record(models.Model):
 
     label_choices = [
-        ('accepting', 'accepting'),
-        ('rejecting', 'rejecting'),
+        ('Accepting', 'Accepting'),
+        ('Rejecting', 'Rejecting'),
     ]
     record_id = models.AutoField(primary_key=True)
     code = models.TextField()

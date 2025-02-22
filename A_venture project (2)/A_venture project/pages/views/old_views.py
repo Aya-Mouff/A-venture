@@ -71,9 +71,9 @@ def change_status(request, record_id):
                 data = json.loads(request.body.decode('utf-8'))
                 new_status = data.get('status')
 
-                if new_status not in ['accepted', 'rejected']:
+                if new_status not in ['Accepted', 'Rejected']:
                     current_status = record.label
-                    new_status = 'rejected' if current_status == 'accepted' else 'accepted'
+                    new_status = 'Rejected' if current_status == 'Accepted' else 'Accepted'
 
                 record.label = new_status
                 record.save()  # Now the label should update correctly
