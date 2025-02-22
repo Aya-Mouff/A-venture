@@ -5,6 +5,7 @@ from werkzeug.utils import secure_filename
 import os
 import logging
 from sentence_transformers import SentenceTransformer
+import numpy as np
 
 app = Flask(__name__)
 
@@ -19,11 +20,8 @@ logging.basicConfig(level=logging.DEBUG)
 
 # Load the classifier model
 try:
-    model_path = 'flask_api/activity_classifier.pkl'  # Path to your classifier
-    if not os.path.exists(model_path):
-        raise FileNotFoundError(f"Classifier model not found at: {model_path}")
-    model = joblib.load(model_path)
-    logging.info(f"Classifier model loaded from: {model_path}")
+    model = joblib.load('flask_api/activity_classifier.pkl')
+    logging.info("Classifier model loaded successfully.")
 except Exception as e:
     logging.error(f"Error loading classifier: {e}")
     exit()
@@ -51,13 +49,19 @@ def predict():
             return jsonify({"error": "No text provided"}), 400
 
         transformed_text = vectorizer.encode([text])  # Use encode()
+        logging.debug(f"Transformed text: {transformed_text}")
 
-        prediction = model.predict(transformed_text)
-        return jsonify({"prediction": prediction.tolist()})
+        if isinstance(transformed_text, np.ndarray):  # Check if it is a NumPy array
+            transformed_text_reduced = transformed_text[:, :384]  # Select the first 384 features
+            prediction = model.predict(transformed_text_reduced)
+            return jsonify({"prediction": prediction.tolist()})
+        else:
+            logging.error("transformed_text is not a NumPy array")
+            return jsonify({"error": "Internal error"}), 500
 
     except Exception as e:
         logging.error(f"Error in /predict: {e}")
-        return jsonify({"error": "An error occurred"}), 500
+        return jsonify({"error": f"An error occurred: {e}"}), 500
 
 @app.route("/upload", methods=["POST"])
 def upload_file():
@@ -81,13 +85,19 @@ def upload_file():
 
             df = pd.read_excel(filepath)
             descriptions = df['description'].tolist()
-
             logging.debug(f"Descriptions: {descriptions}")
 
             transformed_descriptions = vectorizer.encode(descriptions)
+            logging.debug(f"Type of transformed_descriptions: {type(transformed_descriptions)}")
+            logging.debug(f"Transformed descriptions: {transformed_descriptions}")
 
-            predictions = model.predict(transformed_descriptions)
-            df['predicted_label'] = predictions.tolist()  # Convert predictions to list
+            if isinstance(transformed_descriptions, np.ndarray):  # Check if it is a NumPy array
+                transformed_descriptions_reduced = transformed_descriptions[:, :384]  # Select the first 384 features
+                predictions = model.predict(transformed_descriptions_reduced)
+                df['predicted_label'] = predictions.tolist()  # Convert predictions to list
+            else:
+                logging.error("transformed_descriptions is not a NumPy array")
+                return jsonify({"error": "Internal error"}), 500
 
             output_filepath = os.path.join(app.config['UPLOAD_FOLDER'], 'predictions.xlsx')
             df.to_excel(output_filepath, index=False)
