@@ -34,5 +34,3 @@ print("Predictions saved to 15000_results.xlsx ✅")
 joblib.dump(clf, "activity_classifier.pkl")
 
 clf = joblib.load("activity_classifier.pkl")
-
-
